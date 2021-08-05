@@ -59,12 +59,13 @@ class CashCalculator(Calculator):
         """
         Возвращает остаток денег в заданной валюте на текущий день.
         """
-        if self.get_remnant() == 0:
+        remnant = self.get_remnant()
+        if remnant == 0:
             return 'Денег нет, держись'
         currency_dict = {'rub': ('руб', 1),
                          'usd': ('USD', self.USD_RATE),
                          'eur': ('Euro', self.EURO_RATE)}
-        remnant = round(self.get_remnant() / currency_dict[currency][1], 2)
+        remnant = round(remnant / currency_dict[currency][1], 2)
         currency_text = currency_dict[currency][0]
         if remnant > 0:
             return (f'На сегодня осталось {remnant}'
