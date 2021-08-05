@@ -1,5 +1,6 @@
 import datetime as dt
 from typing import Optional
+
 DATE_FORMAT = '%d.%m.%Y'
 
 
@@ -11,8 +12,6 @@ class Record:
             self.date = dt.datetime.now().date()
         else:
             self.date = dt.datetime.strptime(date, DATE_FORMAT).date()
-            # Привет! Вынес формат в константу за пределами класса, но ведь
-            # когда класс импортируют, там этой переменной не будет, как быть?
         self.comment: str = comment
 
 
@@ -32,8 +31,9 @@ class Calculator:
         """
         Возвращает расход за текущий день.
         """
+        today_date = dt.datetime.now().date()
         return sum(record.amount for record in self.records
-                   if record.date == dt.datetime.now().date())
+                   if record.date == today_date)
 
     def get_week_stats(self) -> float:
         """
@@ -59,18 +59,19 @@ class CashCalculator(Calculator):
         """
         Возвращает остаток денег в заданной валюте на текущий день.
         """
-        currency_dict = {'rub': ('руб', 1), 'usd': ('USD', self.USD_RATE),
+        if self.get_remnant() == 0:
+            return 'Денег нет, держись'
+        currency_dict = {'rub': ('руб', 1),
+                         'usd': ('USD', self.USD_RATE),
                          'eur': ('Euro', self.EURO_RATE)}
         remnant = round(self.get_remnant() / currency_dict[currency][1], 2)
         currency_text = currency_dict[currency][0]
-        if remnant == 0:
-            return 'Денег нет, держись'
-        elif remnant > 0:
+        if remnant > 0:
             return (f'На сегодня осталось {remnant}'
                     f' {currency_text}')
-        else:
-            return (f'Денег нет, держись: твой долг - {abs(remnant)}'
-                    f' {currency_text}')
+        remnant = abs(remnant)
+        return (f'Денег нет, держись: твой долг - {remnant}'
+                f' {currency_text}')
 
 
 class CaloriesCalculator(Calculator):
@@ -78,6 +79,5 @@ class CaloriesCalculator(Calculator):
         remnant = self.get_remnant()
         if remnant <= 0:
             return 'Хватит есть!'
-        # else был избыточен, т.к. ничего не менял
         return ('Сегодня можно съесть что-нибудь ещё, но'
                 f' с общей калорийностью не более {remnant} кКал')
